@@ -4,7 +4,7 @@
 
 - Tên nhóm: K3-Observability
 - Repository URL: https://github.com/anybody1234/Day13-K3-Observability
-- Commit SHA cuối: (sẽ cập nhật sau commit cuối)
+- Commit SHA cuối: 8d922fb35fc74cbcc428f9117e602fa0c76a6e99
 - Thành viên và vai trò:
   - Phan Hoàng Long (2A202601565) — Thành viên A: Logging & Middleware (Correlation ID, log metadata)
   - Phạm Bá Thượng Hải (2A202601797) — Thành viên B: Security & Compliance (PII redaction, regex patterns)
