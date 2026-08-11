@@ -3,13 +3,24 @@ from __future__ import annotations
 import hashlib
 import re
 
+# Both the accented and the unaccented spelling: people type addresses either way.
+_VN_ADDR_KW = (
+    r"(?:đường|dường|duong|phường|phuong|phố|pho|quận|quan|huyện|huyen|"
+    r"thành phố|thanh pho|tỉnh|tinh|thị trấn|thi tran|xã|ấp)"
+)
+
 PII_PATTERNS: dict[str, str] = {
     "email": r"[\w\.-]+@[\w\.-]+\.\w+",
     "phone_vn": r"(?<!\d)(?:\+84|0)(?:[ .-]?\d){9}(?!\d)",
     "cccd": r"\b\d{12}\b",
     "credit_card": r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b",
     "passport": r"\b[A-Z]{1,2}\d{6,9}\b",
-    "vn_address": r"\b(?:\d+[\s,]+(?:đường|phố|phường|quận|huyện|thành phố|tỉnh|xã|ấp|thị trấn)[\s,]+[A-ZÀ-ỹ][A-Za-zÀ-ỹ\s,-]+){2,}\b",
+    # A house number anchors each segment, which both keeps ordinary prose ("đơn hàng 15
+    # ngày") from matching and stops the trailing group from backtracking exponentially.
+    # Case folding is scoped to this pattern: applying it globally would let `passport`
+    # match lowercase text.
+    "vn_address": rf"(?i:(?:\bsố\s*|\bso\s*)?\b\d{{1,4}}[\s,]+{_VN_ADDR_KW}\b[\s,]*[^\s,;]+"
+    rf"(?:[\s,]+{_VN_ADDR_KW}\b[\s,]*[^\s,;]+)*)",
 }
 
 

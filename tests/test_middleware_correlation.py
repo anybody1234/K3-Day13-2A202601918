@@ -78,3 +78,20 @@ def test_inbound_request_id_is_reused_only_when_safe(log_path: Path) -> None:
 
     assert trusted.headers["x-request-id"] == "req-upstream-01"
     assert GENERATED_ID.fullmatch(rejected.headers["x-request-id"])
+
+
+def test_inbound_request_id_shaped_like_pii_is_replaced(log_path: Path) -> None:
+    # The correlation id bypasses the log scrubber, so an id carrying PII has to be
+    # dropped here or it reaches data/logs.jsonl verbatim.
+    pii_ids = ("0987654321", "123456789012", "4111-1111-1111-1111")
+
+    with TestClient(app) as client:
+        for pii_id in pii_ids:
+            response = client.post(
+                "/chat", json=CHAT_PAYLOAD, headers={"x-request-id": pii_id}
+            )
+            assert GENERATED_ID.fullmatch(response.headers["x-request-id"])
+
+    logged = "\n".join(json.dumps(event) for event in read_events(log_path))
+    for pii_id in pii_ids:
+        assert pii_id not in logged
