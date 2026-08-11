@@ -6,6 +6,10 @@
 - Repository URL: https://github.com/anybody1234/Day13-K3-Observability
 - Commit SHA cuối: (sẽ cập nhật sau commit cuối)
 - Thành viên và vai trò:
+  - Phan Hoàng Long (2A202601565) — Thành viên A: Logging & Middleware (Correlation ID, log metadata)
+  - Phạm Bá Thượng Hải (2A202601797) — Thành viên B: Security & Compliance (PII redaction, regex patterns)
+  - Lục Minh Đức (2A202601918) — Thành viên C: Metrics & Alerting (error_rate_pct, SLO, alert rules, runbook)
+  - Phạm Nguyên Việt (2A202601547) — Thành viên D: QA & Incident Analyst (Dashboard, CP3 challenge, REPORT)
 
 ## 2. Kết quả kỹ thuật
 
@@ -23,9 +27,9 @@
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID: Mỗi request có unique correlation ID dạng `req-XXXXXXXX` (ví dụ: `req-81929f37`, `req-c300daeb`). Correlation ID được tạo tại middleware, bind vào structlog context, và trả về trong response header `x-request-id`.
-- Evidence PII redaction: Email, SĐT VN, CCCD, credit card và VN address đều được scrub bởi `pii.py` trước khi log ghi xuống file. Validator xác nhận 0 PII leak.
-- Evidence trace waterfall: Xem Langfuse dashboard tại `https://jp.cloud.langfuse.com`
+- Evidence correlation ID: Mỗi request có unique correlation ID dạng `req-XXXXXXXX` (ví dụ: `req-81929f37`, `req-c300daeb`). Correlation ID được tạo tại middleware, bind vào structlog context, và trả về trong response header `x-request-id`. Xem ảnh: `submission/evidence/correlation.png`
+- Evidence PII redaction: Email, SĐT VN, CCCD, credit card và VN address đều được scrub bởi `pii.py` trước khi log ghi xuống file. Validator xác nhận 0 PII leak. Xem ảnh: `submission/evidence/redacted.png`
+- Evidence trace waterfall: Danh sách ≥10 traces tại `submission/evidence/trace.png`. Waterfall span chi tiết tại `submission/evidence/waterfall span.png`
 - Giải thích span đáng chú ý: Span `LabAgent.run` (generation) chứa toàn bộ pipeline: RAG retrieval → prompt resolve → LLM generate. Khi `rag_slow` bật, span này tăng từ ~550ms lên ~3050ms do RAG retrieval thêm 2.5s delay.
 
 ## 4. Prompt versioning
@@ -38,8 +42,8 @@
 
 ## 5. Dashboard, SLO và alerts
 
-- Kết quả `validate_dashboard.py`: **HỢP LỆ: 6/6 panel**
-- Evidence dashboard: Streamlit dashboard (`dashboard_app.py`) với 6 panel:
+- Kết quả `validate_dashboard.py`: **HỢP LỆ: 6/6 panel** — xem ảnh `submission/evidence/score.png`
+- Evidence dashboard: Streamlit dashboard (`dashboard_app.py`) với 6 panel — xem ảnh `submission/evidence/dashboard.png`:
   1. **Latency Percentiles** — P50, P95, P99 (ms), SLO: P95 ≤ 3000ms
   2. **Request Traffic** — count, rate/min, threshold: rate ≥ 1 req/min
   3. **Error Rate & Breakdown** — error_rate_pct, count by error_type, SLO: ≤ 2%
@@ -89,6 +93,8 @@ Các request bị ảnh hưởng (feature=refund, latency > 2000ms):
 
 Incident event trong log: `incident_enabled` tại `2026-08-11T04:54:04Z` với `payload: {name: rag_slow}`
 
+Xem ảnh evidence: `submission/evidence/challenge investigation.png`
+
 ### Root cause
 
 **Luồng điều tra: Metrics → Traces → Logs**
@@ -117,6 +123,7 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| | CP1: Logging, PII, Correlation ID | `7d193d7`, `6eca361`, `4c0bd64` | Structlog processors, PII regex patterns |
-| | CP2: Dashboard, SLO, Alert rules | `d242383` | Streamlit dashboard, dashboard contract validation |
-| | CP3: Challenge investigation | (commit này) | Metrics→Traces→Logs investigation flow |
+| Phan Hoàng Long (2A202601565) | Role A — Middleware, Correlation ID, gán log metadata vào structlog context | `f94cf54`, `810521c` | structlog contextvars, bind_contextvars, clear_contextvars để truyền correlation_id xuyên suốt request |
+| Phạm Bá Thượng Hải (2A202601797) | Role B — PII processor, regex patterns che email, SĐT Việt Nam, CCCD, thẻ tín dụng, địa chỉ | `7a9e4c0` | Cách xây dựng structlog processor chain, viết regex PII redaction an toàn |
+| Lục Minh Đức (2A202601918) | Role C — Đo đếm error_rate_pct, viết config/slo.yaml, config/alert_rules.yaml và docs/alerts.md | `7d193d7`, `6eca361`, `4c0bd64` | Thiết kế SLI/SLO, alert dựa trên triệu chứng người dùng, viết runbook điều tra sự cố |
+| Phạm Nguyên Việt (2A202601547) | Role D — Xây Streamlit dashboard 6 panel, chủ trì điều tra CP3 rag_slow, hoàn thiện REPORT.md | `d242383`, `e963436` | Luồng điều tra Metrics→Traces→Logs, xác định root cause từ span và log evidence |
