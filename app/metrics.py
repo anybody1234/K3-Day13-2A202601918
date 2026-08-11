@@ -38,11 +38,14 @@ def percentile(values: list[int], p: int) -> float:
 
 
 def snapshot() -> dict:
+    total_errors = sum(ERRORS.values())
+    error_rate = round(total_errors / TRAFFIC * 100, 2) if TRAFFIC else 0.0
     return {
         "traffic": TRAFFIC,
         "latency_p50": percentile(REQUEST_LATENCIES, 50),
         "latency_p95": percentile(REQUEST_LATENCIES, 95),
         "latency_p99": percentile(REQUEST_LATENCIES, 99),
+        "error_rate_pct": error_rate,
         "avg_cost_usd": round(mean(REQUEST_COSTS), 4) if REQUEST_COSTS else 0.0,
         "total_cost_usd": round(sum(REQUEST_COSTS), 4),
         "tokens_in_total": sum(REQUEST_TOKENS_IN),

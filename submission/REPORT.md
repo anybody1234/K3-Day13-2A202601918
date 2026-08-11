@@ -9,7 +9,13 @@
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`:
+- Điểm `validate_logs.py`: **30/100** (baseline — trước khi fix TODO)
+  - FAILED: Missing required fields (correlation_id = "MISSING")
+  - FAILED: Correlation ID propagation (< 2 unique IDs)
+  - FAILED: Log enrichment (thiếu user_id_hash, session_id, feature, model)
+  - PASSED: PII scrubbing (không có PII trong sample queries)
+  - Tổng log records: 24 bản ghi JSON hợp lệ
+  - `python -m pytest -q`: 22 passed, 2 warnings
 - Tổng số traces:
 - Số PII leak còn lại:
 - Link/đường dẫn dashboard:

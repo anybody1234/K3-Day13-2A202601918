@@ -4,13 +4,16 @@ slis:
   latency_p95_ms:
     objective: 3000
     target: 99.5
-    note: Replace with your group's target
+    note: 99.5% of 28-day windows must have P95 latency <= 3000ms
   error_rate_pct:
     objective: 2
     target: 99.0
+    note: 99% of 28-day windows must have error rate <= 2%
   daily_cost_usd:
     objective: 2.5
     target: 100.0
+    note: Daily cost must not exceed $2.50
   quality_score_avg:
     objective: 0.75
     target: 95.0
+    note: 95% of 28-day windows must have mean quality score >= 0.75
